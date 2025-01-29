@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { TodoProvider } from './Contexts'
+import { TodoProvider } from './Contexts/TodoContext';
 import TodoForm from './Components/TodoForm'
 import TodoItem from './Components/TodoItem'
 
@@ -10,16 +10,19 @@ const App = () => {
         setTodos((prev) => [...prev, { id: Date.now(), ...todo }])
     }
 
-    const updateTodo = (id, todo) => {
-        setTodos((prev) => prev.map((item) => (item.id === id ? todo : item)))
+    const updateTodo = (id, updatedTodo) => {
+        setTodos((prev) =>
+            prev.map((item) => (item.id === id ? { ...item, ...updatedTodo } : item))
+        );
     }
+
 
     const deleteTodo = (id) => {
         setTodos((prev) => prev.filter((item) => item.id !== id))
     }
 
     const toggleComplete = (id) => {
-        setTodos((prev) => prev.map((item) => item === id ? { ...item, completed: !item.completed } : item))
+        setTodos((prev) => prev.map((item) => item.id === id ? { ...item, completed: !item.completed } : item))
     }
 
     useEffect(() => {
@@ -31,7 +34,9 @@ const App = () => {
     }, [])
 
     useEffect(() => {
-        localStorage.setItem("todos", JSON.stringify(todos))
+        if (todos.length > 0) {
+            localStorage.setItem("todos", JSON.stringify(todos))
+        }
     }, [todos])
 
 
@@ -46,7 +51,13 @@ const App = () => {
                     </div>
                     <div className="flex flex-wrap gap-y-3">
                         {/*Loop and Add TodoItem here */}
-                        <TodoItem />
+                        {
+                            todos.map((todo) => (
+                                <div className='w-full' key={todo.id}>
+                                    <TodoItem todo={todo} />
+                                </div>
+                            ))
+                        }
                     </div>
                 </div>
             </div>
